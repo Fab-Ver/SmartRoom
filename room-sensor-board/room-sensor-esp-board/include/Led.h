@@ -8,8 +8,8 @@ class Led : public Light {
         int pin;
     public:
         Led(int pin);
-        void switchOn() = 0;
-        void switchOff() = 0;
+        void switchOn();
+        void switchOff();
 };
 
 #endif
