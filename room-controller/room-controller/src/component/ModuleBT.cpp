@@ -34,3 +34,7 @@ Msg* ModuleBT::receiveMsg(){
     }
 }
 
+void ModuleBT::sendMsg(Msg msg){
+    channel->println(msg.getContent());
+}
+
