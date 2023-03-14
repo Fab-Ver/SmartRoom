@@ -3,19 +3,7 @@
 
 #include "Arduino.h"
 #include "SoftwareSerial.h"
-
-class Msg {
-    private:
-        String content;
-    public:
-        Msg(const String& content){
-            this->content = content;
-        }
-  
-        String getContent(){
-            return content;
-        }
-};
+#include "Msg.h"
 
 class ModuleBT{
     private:
@@ -40,6 +28,12 @@ class ModuleBT{
          * @return the message if available, NULL otherwise. 
         */
         Msg* receiveMsg();
+
+        /**
+         * Send a message in the BT channel.
+         * @param msg the message to be sent. 
+        */
+        void sendMsg(Msg msg);
 };
 
 #endif
