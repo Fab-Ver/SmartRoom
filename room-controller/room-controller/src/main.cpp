@@ -4,6 +4,7 @@
 #include "SerialCommunicator.h"
 #include "Led.h"
 #include "RollerBlind.h"
+#include "ArduinoJson.h"
 
 ModuleBT* bt;
 SerialCommunicator* serial = new SerialCommunicator();
@@ -22,7 +23,22 @@ void loop() {
   if(serial->isMsgAvailable()){
     Msg* msg = serial->receiveMsg();
     bt->sendMsg(Msg(msg->getContent()));
-    /*JSON e controlli*/
+
+    DynamicJsonDocument doc(1024);
+    deserializeJson(doc,msg->getContent());
+    String led_state = doc["led_state"];
+    int rb_angle = doc["rb_angle"];
+
+    if(led_state == "ON"){
+      led->switchOn();
+    } else {
+      led->switchOff();
+    }
+
+    rb->on();
+    rb->setPosition(rb_angle);
+    rb->off();
+
     delete msg;
   }
 
