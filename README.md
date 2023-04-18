@@ -10,7 +10,7 @@ The system is composed of 5 subsystems:
 - <b>Room App (Android - smartphone):</b> mobile app that makes it possible to manually control lights and roller blinds, it interacts with the Room Controller via Bluetooth.
 - <b>Room Dashboard (Frontend)</b>: front-end to visualise and track the state of the room, it interacts with the Room Service.
 
-### Hardware components 
+### Hardware components :desktop_computer:
 - <b>Room Sensor-board:</b>
   - SoC ESP32 board (or ESP8266)
   - 1 green led 
@@ -33,7 +33,7 @@ The Smart Room system is meant to control the lighting system and roller blinds 
 - Through the dashboard a room manager can: track the state of the room, in particular in which hours and how long the lights where on fully control the light and roller blinds.
 - It can be assumed that the room is accessed from 8:00 to 19:00. 
 
-### Further details:
+### Further details :spiral_notepad: 
 
 - About the Room Sensor-board: the led should be on when someone is in the room and off when no one is the room
 - About the Room Controller: the servo motor controls/simulates the roller blinds (0° means completely rolled-up
