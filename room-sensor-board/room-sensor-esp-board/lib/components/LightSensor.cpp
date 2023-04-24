@@ -6,5 +6,6 @@ LightSensor::LightSensor(int pin){
 }
 
 bool LightSensor::isDark(){
-    return analogRead(pin) < THRESHOLD;
+    int value = analogRead(pin);
+    return value < THRESHOLD;
 }
