@@ -1,14 +1,22 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include "config.h"
-#include "common.h"
 #include "CommunicationTask.h"
 #include "FetchDataTask.h"
 #include "LedTask.h"
+#include "commons.h"
+
+/**
+ * WIFI network info
+*/
+const char* ssid = "iPhone di Fabio";
+const char* password = "fabio0104";
 
 SemaphoreHandle_t xMutex;
+void setup_wifi();
 
 void setup() {
+  Serial.begin(115200);
   xMutex = xSemaphoreCreateMutex();
   setup_wifi();
   Task* fetchData = new FetchDataTask(LS_PIN,PIR_PIN);
@@ -21,7 +29,7 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  delay(1000000);
 }
 
 void setup_wifi(){
