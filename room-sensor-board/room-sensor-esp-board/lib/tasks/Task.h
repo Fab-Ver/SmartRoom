@@ -4,7 +4,7 @@
 class Task {
     private:
         virtual void tick() = 0;
-        virtual static void tickWrapper(void* _this) = 0;
+        static void tickWrapper(void* _this);
     public: 
         virtual void init() = 0;    
 };
