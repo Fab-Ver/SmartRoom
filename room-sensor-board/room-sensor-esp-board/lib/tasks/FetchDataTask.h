@@ -8,14 +8,10 @@
 #include "Pir.h"
 #include "time.h"
 #include <Arduino.h>
-#include "common.h"
+#include "commons.h"
+#include "config.h"
 
-const char* ntpServer = "pool.ntp.org";
-const long  gmtOffset_sec = 3600;
-const int   daylightOffset_sec = 3600;
-bool currentDetectionState = false;
-bool currentDarkState = false;
-int currentHour = NULL;
+int getCurrentHour();
 
 class FetchDataTask : public Task{
     private:
