@@ -1,5 +1,5 @@
-#ifndef __COMMON__
-#define __COMMON__
+#ifndef __COMMONS__
+#define __COMMONS__
 
 #include <Arduino.h>
 

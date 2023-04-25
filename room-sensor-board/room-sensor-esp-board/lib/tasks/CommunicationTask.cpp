@@ -11,12 +11,15 @@ const char* mqtt_server = "broker.mqtt-dashboard.com";
 /**
  * MQTT topic
 */
-const char* topic = "data";
+const char* light_topic = "light-state";
+const char* roller_blind_topic = "roller-blind-state";
+
+unsigned long lastCommunication = 0;
 
 CommunicationTask::CommunicationTask(){
-    /*randomSeed(micros());
+    randomSeed(micros());
     client.setServer(mqtt_server, 1883);
-    client.setCallback(callback);*/
+    client.setCallback(callback);
     this->currLightState = UNDEFINED;
     this->prevLightState = UNDEFINED;
     this->currRollerBlindState = UNDETERMINED;
@@ -34,60 +37,56 @@ void CommunicationTask::tickWrapper(void* _this){
 
 void CommunicationTask::tick(){
 	for(;;){ 
-        /*if(!client.connected()){
-            reconnect();
+        unsigned long now = millis();
+        if(now - lastCommunication >= TASK_PERIOD){
+        	lastCommunication = now;
+          	if(!client.connected()){
+            	reconnect();
+          	}
+          	client.loop();
+          	bool detectionState;
+          	bool darkState;
+          	int hour;
+          	xSemaphoreTake(xMutex, portMAX_DELAY);
+          	detectionState = currentDetectionState;
+          	darkState = currentDarkState;
+          	hour = currentHour;
+          	xSemaphoreGive(xMutex);
+        
+          	currLightState = OFF;
+          	currRollerBlindState = UNDETERMINED;
+        	if(hour != UNDEFINED){
+            	if(hour >= 8 && hour < 19 && detectionState){
+                	currRollerBlindState = UP;
+            	} else if((hour >= 19 || hour < 8) and !detectionState){
+                	currRollerBlindState = DOWN;
+            	}
+        	}
+        	if(detectionState && darkState){
+            	currLightState = ON;
+        	}
+       		if(currLightState != prevLightState){
+          		DynamicJsonDocument doc(1024);
+          		doc["light"] = currLightState == ON ? true : false;
+          		char* msg_json = (char*) malloc(1024);
+          		serializeJson(doc,msg_json,1024);
+          		Serial.println(msg_json);
+          		client.publish(light_topic,msg_json);
+          		prevLightState = currLightState;
+          		free(msg_json);
+        	}
+        	if(currRollerBlindState != prevRollerBlindState && currRollerBlindState != UNDETERMINED){
+          		DynamicJsonDocument doc(1024);
+          		doc["roller_blind"] = currRollerBlindState == UP ? 0 : 100;
+          		char* msg_json = (char*) malloc(1024);
+          		serializeJson(doc,msg_json,1024);
+          		Serial.println(msg_json);
+          		client.publish(roller_blind_topic,msg_json);
+          		prevRollerBlindState = currRollerBlindState;
+          		free(msg_json);
+        	}
         }
-        client.loop();*/
-        //Serial.println("Communication");
-        bool detectionState;
-        bool darkState;
-        int hour;
-        xSemaphoreTake(xMutex, portMAX_DELAY);
-        detectionState = currentDetectionState;
-        darkState = currentDarkState;
-        hour = currentHour;
-        xSemaphoreGive(xMutex);
-        /* Serial.println(detectionState);
-        Serial.println(darkState);
-        Serial.println(hour); */
-        currLightState = OFF;
-        currRollerBlindState = UNDETERMINED;
-        if(hour != UNDEFINED){
-            if(hour >= 8 && hour < 19 && detectionState){
-                currRollerBlindState = UP;
-            } else if((hour >= 19 || hour <8) and !detectionState){
-                currRollerBlindState = DOWN;
-            }
-        }
-        if(detectionState && darkState){
-            currLightState = ON;
-        }
-        if(currLightState != prevLightState){
-          DynamicJsonDocument doc(1024);
-          doc["light"] = currLightState == ON ? true : false;
-          char* msg_json;
-          serializeJson(doc,msg_json,1024);
-          Serial.println(msg_json);
-        }
-        if(currRollerBlindState != prevRollerBlindState && currRollerBlindState != UNDETERMINED){
-          DynamicJsonDocument doc(1024);
-          doc["roller_blind"] = currRollerBlindState == UP ? 0 : 100;
-          char* msg_json;
-          serializeJson(doc,msg_json,1024);
-          Serial.println(msg_json);
-        }
-        /*if(currentLightState != previousLightState || currentRollerBlindLevel != previousRollerBlindLevel){
-            DynamicJsonDocument doc(1024);
-            doc["light"] = String(currentDarkState);
-            doc["rollerBlind"] = String(currentRollerBlindLevel != currentRollerBlindLevel ? currentRollerBlindLevel : NULL);
-            char* msg_json;
-            serializeJson(doc,msg_json,1024);
-            Serial.println(msg_json);
-            /*client.publish(topic,msg_json);
-            previousLightState = currentLightState;
-            previousRollerBlindLevel = currentRollerBlindLevel;*/
-        //}
-        vTaskDelay(200);
+        vTaskDelay(TASK_PERIOD);
     }
 }
 
@@ -105,7 +104,8 @@ void reconnect(){
     /*Attempt to connect*/
     if(client.connect(clientID.c_str())){
       Serial.println("connected");
-      client.subscribe(topic);
+      client.subscribe(light_topic);
+      client.subscribe(roller_blind_topic);
     } else {
       Serial.print("failed rc=");
       Serial.print(client.state());

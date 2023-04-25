@@ -1,5 +1,7 @@
 #include "LedTask.h"
 
+unsigned long last = 0;
+
 LedTask::LedTask(int ledPin){
     this->led = new Led(ledPin);
 	this->currState = UNDEFINED;
@@ -17,20 +19,21 @@ void LedTask::tickWrapper(void* _this){
 
 void LedTask::tick(){
 	for(;;){
-		/* Serial.println("Led"); */
-		int detectionState;
-		xSemaphoreTake(xMutex, portMAX_DELAY);
-		detectionState = currentDetectionState;
-		xSemaphoreGive(xMutex);
-		currState = detectionState ? ON : OFF;
-		if(currState != previousState){
-			if(currState == ON){
-      			led->switchOn();
-    		} else {
-      			led->switchOff();
-    		} 
-    		previousState = currState;
+		unsigned long now = millis();
+		if(now - last >= TASK_PERIOD){
+			last = now;
+			xSemaphoreTake(xMutex, portMAX_DELAY);
+			currState = currentDetectionState ? ON : OFF;
+			xSemaphoreGive(xMutex);
+			if(currState != previousState){
+				if(currState == ON){
+      				led->switchOn();
+    			} else {
+      				led->switchOff();
+    			} 
+    			previousState = currState;
+			}
 		}
-		vTaskDelay(200);
+		vTaskDelay(TASK_PERIOD);
   	}
 }

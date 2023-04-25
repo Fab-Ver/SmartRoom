@@ -35,7 +35,7 @@ void loop() {
 void setup_wifi(){
   delay(10);
 
-  Serial.println(String("Connecting to ") + ssid);
+  Serial.print(String("Connecting to ") + ssid);
 
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid,password);
@@ -45,6 +45,5 @@ void setup_wifi(){
     Serial.print(".");
   }
 
-  Serial.println("");
   Serial.println("WiFi connected");
 }

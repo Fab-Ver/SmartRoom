@@ -1,8 +1,6 @@
 #ifndef __FETCH_DATA_TASK__
 #define __FETCH_DATA_TASK__
 
-#define TASK_PERIOD 200
-
 #include "Task.h"
 #include "LightSensor.h"
 #include "Pir.h"
@@ -15,8 +13,8 @@ int getCurrentHour();
 
 class FetchDataTask : public Task{
     private:
-        PhotoResistor* lightSensor;
         MotionSensor* pir;
+        PhotoResistor* lightSensor;
         TaskHandle_t fetchDataHandle;
         void tick();
         static void tickWrapper(void* _this);

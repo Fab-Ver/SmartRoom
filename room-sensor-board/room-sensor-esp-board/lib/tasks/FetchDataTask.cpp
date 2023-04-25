@@ -2,8 +2,6 @@
 
 unsigned long lastDetection = 0;
 const char* ntpServer = "pool.ntp.org";
-const long  gmtOffset_sec = 3600;
-const int   daylightOffset_sec = 3600;
 bool currentDetectionState = false;
 bool currentDarkState = false;
 int currentHour = UNDEFINED_HOUR;
@@ -14,7 +12,7 @@ FetchDataTask::FetchDataTask(int lsPin, int pirPin){
 }
 
 void FetchDataTask::init(){
-    configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+    configTime(GMT_OFFSET_SEC, DAYLIGHT_OFFSET_SEC, ntpServer);
     xTaskCreatePinnedToCore(this->tickWrapper, "FetchDataTask", 8192, this, 2, &fetchDataHandle, 0);
     delay(500);
 }
@@ -27,7 +25,6 @@ void FetchDataTask::tick(){
 	for(;;){ 
         unsigned long now = millis();
         if(now - lastDetection >= TASK_PERIOD){
-            /* Serial.println("Fetch"); */
             lastDetection = now;
             int hour = getCurrentHour();
             bool dark = lightSensor->isDark();
@@ -38,7 +35,7 @@ void FetchDataTask::tick(){
             currentDetectionState = detected;
             xSemaphoreGive(xMutex);
         }
-        vTaskDelay(200);
+        vTaskDelay(TASK_PERIOD);
     }
 }
 
