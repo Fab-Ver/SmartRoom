@@ -2,6 +2,7 @@
   "name": "room-dashboard",
   "version": "0.1.0",
   "private": true,
+  "proxy" : "http://localhost:8080",
   "dependencies": {
     "@coreui/coreui": "^4.2.6",
     "@coreui/react": "^4.7.0",

@@ -34,3 +34,7 @@ div.card-footer {
   justify-content: right;
 }
 
+div.alert {
+  width: 96%;
+  margin-left: 2%;
+}

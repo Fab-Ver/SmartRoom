@@ -1,4 +1,4 @@
-import {CBadge, CButton, CCard, CCardBody, CCardFooter, CCardHeader, CCol, CContainer, CFormRange, CFormSwitch,CRow} from '@coreui/react'
+import {CAlert, CBadge, CButton, CCard, CCardBody, CCardFooter, CCardHeader, CCol, CContainer, CFormRange, CFormSwitch,CRow} from '@coreui/react'
 import '@coreui/coreui/dist/css/coreui.min.css'
 import './App.css'
 import { useEffect, useState } from 'react'
@@ -10,6 +10,9 @@ const App = () => {
   const [manageRollerBlind, setManageRollerBlind] = useState(50)
   const [currentLightState, setCurrentLightState] = useState(null)
   const [currentRollerBlindState, setCurrentRollerBlindState] = useState(null)
+
+  const [visibleAlert,setVisibleAlert] = useState(false);
+  const [alertState,setAlertState] = useState(false);
 
   const [lightData, setLightData] = useState({
 	label : [],
@@ -46,7 +49,7 @@ const App = () => {
 	console.log(new_point)
 	setPoint(new_point)
 	console.log(point)*/
-	axios.post('URL', {}, {
+	axios.post('/data', {}, {
 		headers: {
 		  'Content-Type': 'multipart/form-data',
 		  'Accept': 'application/json',
@@ -63,19 +66,19 @@ const App = () => {
   }
 
   const changeStatus = () => {
-	axios.post('URL', { light: manageLight, rollerBlind : manageRollerBlind }, {
+	axios.post('/manage_room_state', { light: manageLight, rollerBlind : manageRollerBlind }, {
 		headers: {
-		  'Content-Type': 'multipart/form-data',
+		  'Content-Type': 'application/json',
 		  'Accept': 'application/json',
 		},
 	  }).then((response) => {
-		console.log(response.data)
-		/*if (response.data.success) {
-		  console.log(response.data.payload)
+		if (response.data.success) {
+			setAlertState(true);
+			setVisibleAlert(true);
+		} else {
+			setAlertState(false);
+			setVisibleAlert(true);
 		}
-		else {
-		  console.log(response.data.error.message)
-		}*/
 	})
   }
 
@@ -85,6 +88,9 @@ const App = () => {
 				<h1 className='heading'>Smart Room Dashboard</h1>
 			</CRow>
 			<CRow>
+				<CAlert color={alertState ? 'success' : 'danger'} dismissible visible={visibleAlert} onClose={() => setVisibleAlert(false)}>
+					{alertState ? 'Room state changed successfully' : 'An error occurred while trying to change room state, retry'}
+				</CAlert>
 				<CCol>
 					<CCard className='current-status'>
 						<CCardHeader>
