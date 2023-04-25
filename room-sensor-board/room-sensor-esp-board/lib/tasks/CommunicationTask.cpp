@@ -55,7 +55,7 @@ void CommunicationTask::tick(){
         
           	currLightState = OFF;
           	currRollerBlindState = UNDETERMINED;
-        	if(hour != UNDEFINED){
+        	if(hour != UNDEFINED_HOUR){
             	if(hour >= 8 && hour < 19 && detectionState){
                 	currRollerBlindState = UP;
             	} else if((hour >= 19 || hour < 8) and !detectionState){
