@@ -1,17 +1,18 @@
-#ifndef __MODULE_BT__
-#define __MODULE_BT__
+#ifndef __BLUETOOTH_COMMUNICATOR__
+#define __BLUETOOTH_COMMUNICATOR__
 
-#include "Arduino.h"
+#include <Arduino.h>
 #include "SoftwareSerial.h"
-#include "Msg.h"
+#include "Communicator.h"
 
-class ModuleBT{
+class BluetoothCommunicator : public Communicator {
     private:
         SoftwareSerial* channel;
+        Msg* currentMsg;
+        bool availableMsg; 
         String content;
-        Msg* availableMsg;
     public:
-        ModuleBT(int rxPin, int txPin);
+        BluetoothCommunicator(int rxPin, int txPin);
         /**
          * Init the communication. 
         */

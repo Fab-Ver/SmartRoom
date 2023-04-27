@@ -1,9 +1,9 @@
 #ifndef __SERIAL_COMMUNICATOR__
 #define __SERIAL_COMMUNICATOR__
 
-#include "Msg.h"
+#include "Communicator.h"
 
-class SerialCommunicator{
+class SerialCommunicator : public Communicator{
     private:
         Msg* currentMsg;
         bool availableMsg; 

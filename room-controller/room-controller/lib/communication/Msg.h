@@ -7,7 +7,7 @@ class Msg {
     private:
         String content;
     public:
-        Msg(const String& content){
+        Msg(String content){
             this->content = content;
         }
   

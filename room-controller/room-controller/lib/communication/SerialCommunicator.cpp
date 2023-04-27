@@ -1,5 +1,5 @@
 #include "SerialCommunicator.h"
-#include "Arduino.h"
+#include <Arduino.h>
 
 void SerialCommunicator::init(){
     Serial.begin(9600);
