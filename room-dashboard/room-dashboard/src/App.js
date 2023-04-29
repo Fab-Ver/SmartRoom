@@ -4,6 +4,9 @@ import './App.css'
 import { useEffect, useState } from 'react'
 import { CChart } from '@coreui/react-chartjs'
 import axios from 'axios'
+import { format } from 'date-fns'
+import  CIcon  from '@coreui/icons-react';
+import { cilSync } from '@coreui/icons';
 
 const App = () => {
   const [manageLight, setManageLight] = useState(true)
@@ -26,47 +29,34 @@ const App = () => {
 
   useEffect(() =>{
 	if(lightData.data.length === 0 && lightData.label.length === 0 && rollerBlindData.data.length === 0 && rollerBlindData.label.length === 0){
-		const interval = setInterval(() => requestChartData(), 5000)
+		const interval = setInterval(() => requestChartData(), 1000)
+		updateLightChart();
+		updateRollerBlindChart();
 		return () => clearInterval(interval)
 	}
-  }, [lightData,rollerBlindData])
+  }, [])
 
   const requestChartData = () => {
-	console.log('fatto')
-	/*console.log(point.data)
-	console.log(point.label)
-	console.log(point)
-	let new_data = point.data.slice()
-	let new_label = point.label.slice()
-	new_data.push('ON')
-	new_label.push((point.label.length + 1).toString())
-	console.log(new_data)
-	console.log(new_label)
-	let new_point = {
-		label : new_label,
-		data : new_data,
-	}
-	console.log(new_point)
-	setPoint(new_point)
-	console.log(point)*/
-	axios.post('/data', {}, {
+	axios.post('/current_state', {}, {
 		headers: {
 		  'Content-Type': 'multipart/form-data',
 		  'Accept': 'application/json',
 		},
 	  }).then((response) => {
 		console.log(response.data)
-		/*if (response.data.success) {
-		  console.log(response.data.payload)
+		if (response.data.success !== undefined) {
+		  console.log(response.data.success.light);
+		  console.log(response.data.success.roller_blind);
+		  let light_data = response.data.success.light;
+		  let roller_blind_data = response.data.success.roller_blind;
+			setCurrentLightState(light_data);
+			setCurrentRollerBlindState(roller_blind_data);
 		}
-		else {
-		  console.log(response.data.error.message)
-		}*/
 	})
   }
 
   const changeStatus = () => {
-	axios.post('/manage_room_state', { light: manageLight, rollerBlind : manageRollerBlind }, {
+	axios.post('/manage_room_state', { light: manageLight, rollerBlind : parseInt(manageRollerBlind) }, {
 		headers: {
 		  'Content-Type': 'application/json',
 		  'Accept': 'application/json',
@@ -78,6 +68,53 @@ const App = () => {
 		} else {
 			setAlertState(false);
 			setVisibleAlert(true);
+		}
+	})
+  }
+
+  const updateLightChart = () => {
+	axios.post('/update_light_chart', {}, {
+		headers: {
+		  'Content-Type': 'multipart/form-data',
+		  'Accept': 'application/json',
+		},
+	  }).then((response) => {
+		if (response.data.success !== undefined) {
+		  console.log(response.data.success.light_data);
+		  let light_data = response.data.success.light_data;
+		  if(light_data.length > 0){
+			let new_label = light_data.map(ld => format(new Date(ld.date),'yyyy-MM-dd HH:mm:ss'));
+			let new_data = light_data.map(ld => ld.light ? 'ON' : 'OFF');
+			let new_light_data = {
+				label : new_label,
+				data : new_data,
+			}
+			setLightData(new_light_data)
+		  }
+		}
+	})
+  }
+
+  const updateRollerBlindChart = () => {
+	axios.post('/update_roller_blind_chart', {}, {
+		headers: {
+		  'Content-Type': 'multipart/form-data',
+		  'Accept': 'application/json',
+		},
+	  }).then((response) => {
+		console.log(response.data)
+		if (response.data.success !== undefined) {
+		  console.log(response.data.success.roller_blind_data);
+		  let roller_blind_data = response.data.success.roller_blind_data;
+		  if(roller_blind_data.length > 0){
+			let new_label = roller_blind_data.map(rbd => format(new Date(rbd.date),'yyyy-MM-dd HH:mm:ss'));
+			let new_data = roller_blind_data.map(rbd => rbd.roller_blind);
+			let new_roller_blind_data = {
+				label : new_label,
+				data : new_data,
+			}
+			setRollerBlindData(new_roller_blind_data);
+		  }
 		}
 	})
   }
@@ -137,7 +174,14 @@ const App = () => {
 				<CCol>
 					<CCard className='chart-light'>
 						<CCardHeader>
-							<h2>Light Status Chart</h2>
+							<CRow>
+								<CCol xs={11}>
+									<h2>Light Status Chart</h2>
+								</CCol>
+								<CCol xs={1}>
+									<CButton onClick={() => updateLightChart()}><CIcon icon={cilSync} size="lg"/></CButton>
+								</CCol>
+							</CRow>
 						</CCardHeader>
 						<CCardBody>
 							<CChart 
@@ -193,7 +237,14 @@ const App = () => {
 				<CCol>
 					<CCard className='chart-roller'>
 						<CCardHeader>
-							<h2>Roller Blind Status Chart</h2>
+							<CRow>
+								<CCol xs={11}>
+									<h2>Roller Blind Status Chart</h2>
+								</CCol>
+								<CCol xs={1}>
+									<CButton onClick={() => updateRollerBlindChart()}><CIcon icon={cilSync} size="lg"/></CButton>
+								</CCol>
+							</CRow>
 						</CCardHeader>
 						<CCardBody>
 							<CChart 
