@@ -1,15 +1,7 @@
 #include "RollerBlind.h"
 
 RollerBlind::RollerBlind(int pin){
-    this->pin = pin;
-}
-
-void RollerBlind::on(){
     motor.attach(pin);
-}
-
-void RollerBlind::off(){
-    motor.detach();
 }
 
 void RollerBlind::setPosition(int angle){

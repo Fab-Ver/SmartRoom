@@ -8,11 +8,8 @@
 class RollerBlind : public ServoMotor{
     private:
         ServoTimer2 motor;
-        int pin;
     public:
         RollerBlind(int pin);
-        void on();
-        void off();
         void setPosition(int angle);
 };
     
