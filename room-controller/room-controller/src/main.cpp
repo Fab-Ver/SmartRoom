@@ -41,7 +41,7 @@ void loop() {
 }
 
 void modifyState(String msg_json){
-	DynamicJsonDocument doc(1024);
+	StaticJsonDocument<200> doc;
 	DeserializationError error = deserializeJson(doc, msg_json);
 	if(error){
 		Serial.print(F("deserializeJson() failed: "));
@@ -65,12 +65,9 @@ void modifyState(String msg_json){
 		int currRollerBlindState = doc["roller_blind"];
 		if(currRollerBlindState != prevRollerBlindState){
 			int angle = map(currRollerBlindState, 0, 100, 0, 180);
-			rollerBlind->on();
 			rollerBlind->setPosition(angle);
-			rollerBlind->off();
 			prevRollerBlindState = currRollerBlindState;
 		}
-
 	}
 }
 
