@@ -3,6 +3,7 @@
 
 void SerialCommunicator::init(){
     Serial.begin(9600);
+    while(!Serial){};
     content.reserve(256);
     content = "";
     currentMsg = NULL;
