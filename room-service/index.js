@@ -2,9 +2,24 @@ const express = require('express');
 const { body, validationResult } = require('express-validator');
 const mqtt = require('mqtt');
 const client  = mqtt.connect('mqtt://broker.mqtt-dashboard.com');
-let serialport = require('serialport');
- 
+const { SerialPort, ReadlineParser  } = require('serialport');
+const parser = new ReadlineParser()
+
 const PORT = 8080;
+
+const SERIAL_PORT = 'COM7';
+
+const serial = new SerialPort({
+    path : SERIAL_PORT,
+    baudRate : 9600,
+}, function (error){
+    if(error){
+        return console.log('Error: ', error.message);
+    }
+    console.log('Port opened')
+})
+
+serial.pipe(parser);
 
 const app = express();
 
@@ -12,10 +27,27 @@ const lightData = Array();
 const rollerBlindData = Array();
 
 app.use(express.json());
-//app.use(express.urlencoded({ extended: true }));
 
-app.post("/data", (req, res) => {
-    res.json({ message: "Hello from server!" });
+app.post("/current_state", (req, res) => {
+    let response = { success : {
+        light : lightData.length > 0 ? lightData[lightData.length - 1]['light'] : null,
+        roller_blind : rollerBlindData.length > 0 ? rollerBlindData[rollerBlindData.length -1 ]['roller_blind'] : null,
+    }}
+    res.send(response);
+});
+
+app.post("/update_light_chart", (req, res) => {
+    let response = { success : {
+        light_data : lightData,
+    }}
+    res.send(response);
+});
+
+app.post("/update_roller_blind_chart", (req, res) => {
+    let response = { success : {
+        roller_blind_data : rollerBlindData,
+    }}
+    res.send(response);
 });
 
 app.get("/", (req, res) => {
@@ -25,18 +57,19 @@ app.get("/", (req, res) => {
 app.post("/manage_room_state",body('light').isBoolean(),body('rollerBlind').isInt(), (req, res) => {
     let result = validationResult(req);
     if(result.isEmpty()){
-        //console.log(req);
         let light_state = req.body.light;
         lightData.push({
             light : light_state,
             date : new Date().toISOString(),
         })
+        serial.write(JSON.stringify({light : light_state}) + "\n", (err) => writeError(err));
+
         let roller_blind_state = req.body.rollerBlind;
         rollerBlindData.push({
             roller_blind : roller_blind_state, 
             date : new Date().toISOString(),
         })
-        console.log(light_state,roller_blind_state);
+        serial.write(JSON.stringify({roller_blind : roller_blind_state}) + "\n", (err) => writeError(err))
         return res.json({success : true});
     }
 
@@ -73,11 +106,24 @@ client.on('message', (topic,payload) => {
         };
         rollerBlindData.push(data);
     }
+    serial.write(payload.toString() + "\n", (err) => writeError(err));
 })
 
+
+function writeError(error){
+    if(error){
+        return console.log('Error on write: ', error.message);
+    }
+    console.log('Message written on serial line');
+}
+
+parser.on('data', console.log);
 // list serial ports:
-serialport.SerialPort.list().then (
+/*SerialPort.list().then (
   ports => ports.forEach(port =>console.log(port.path)),
   err => console.log(err)
-)
+);*/
+
+
+
 
