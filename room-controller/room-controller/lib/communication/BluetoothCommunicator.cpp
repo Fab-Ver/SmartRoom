@@ -7,6 +7,7 @@ BluetoothCommunicator::BluetoothCommunicator(int rxPin, int txPin){
 void BluetoothCommunicator::init(){
     content.reserve(256);
     channel->begin(9600);
+    channel->print("AT+NAMEroom_controller");
     content = "";
     currentMsg = NULL;
     availableMsg = false;
