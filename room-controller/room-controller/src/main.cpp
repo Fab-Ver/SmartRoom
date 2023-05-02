@@ -14,7 +14,7 @@ RollerBlind* rollerBlind;
 LightState prevLightState = UNDEFINED;
 int prevRollerBlindState = UNKNOWN;
 
-void modifyState(String msg_json);
+bool modifyState(String msg_json);
 
 void setup() {
 	serial = new SerialCommunicator();
@@ -28,46 +28,58 @@ void setup() {
 void loop() {
 	if(serial->isMsgAvailable()){
     	Msg* msg = serial->receiveMsg();
-    	modifyState(msg->getContent());
-    	bluetooth->sendMsg(Msg(msg->getContent()));
+    	bool modified = modifyState(msg->getContent());
+		if(modified){
+			bluetooth->sendMsg(Msg(msg->getContent()));
+		}
     	delete msg;
   	}
   	if(bluetooth->isMsgAvailable()){
     	Msg* msg = bluetooth->receiveMsg();
-    	modifyState(msg->getContent());
-    	serial->sendMsg(Msg(msg->getContent()));
+		String content = msg->getContent();
+		content = content.substring(content.indexOf('{'),content.length());
+    	bool modified = modifyState(content);
+		if(modified){
+			serial->sendMsg(Msg(content));
+			bluetooth->sendMsg(Msg(content));
+		}
     	delete msg;
   	}
 }
 
-void modifyState(String msg_json){
+bool modifyState(String msg_json){
 	StaticJsonDocument<200> doc;
 	DeserializationError error = deserializeJson(doc, msg_json);
 	if(error){
 		Serial.print(F("deserializeJson() failed: "));
-    	Serial.println(error.f_str());
-    	return;
+    	Serial.println(error.c_str());
+    	return false;
 	}
 	JsonObject json = doc.as<JsonObject>();
 	if(json.containsKey("light")){
 		bool light = doc["light"];
 		LightState currLightState = light ? ON : OFF;
 		if(currLightState != prevLightState){
+			rollerBlind->off();
 			if(currLightState == ON){
 				led->switchOn();
 			} else {
 				led->switchOff();
 			}
 			prevLightState = currLightState;
+			return true;
 		}
 	}
 	if(json.containsKey("roller_blind")){
 		int currRollerBlindState = doc["roller_blind"];
 		if(currRollerBlindState != prevRollerBlindState){
 			int angle = map(currRollerBlindState, 0, 100, 0, 180);
+			rollerBlind->on();
 			rollerBlind->setPosition(angle);
 			prevRollerBlindState = currRollerBlindState;
+			return true;
 		}
 	}
+	return false;
 }
 
