@@ -24,6 +24,8 @@ class _HomePage extends State<HomePage> {
 	bool isDisconnecting = false;
 
 	String _messageBuffer = '';
+	bool? currentLightState;
+	int? currentRollerBlindState;
 
 	@override
 	void initState() {
@@ -101,13 +103,13 @@ class _HomePage extends State<HomePage> {
 					],
       		),
       		body: isConnecting 
-				? Container(
+				? SizedBox(
               		width: MediaQuery.of(context).size.width,
               		height: MediaQuery.of(context).size.height,
-              		child: Center(child: CircularProgressIndicator())
+              		child: const Center(child: CircularProgressIndicator())
 				)
 				: !isConnected 
-					? Container(
+					? SizedBox(
               			width: MediaQuery.of(context).size.width,
               			height: MediaQuery.of(context).size.height,
               			child: const Center(child: Text('Connect to the Smart Room Device to use the app'))
@@ -116,6 +118,30 @@ class _HomePage extends State<HomePage> {
         				child: Column(
           			mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           			children: <Widget>[
+						Row(
+							mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+							children: <Widget>[
+								Chip(
+									label: currentLightState == null ? const Text('UNKNOWN',style: TextStyle(color: Colors.white),) : currentLightState == true ? const Text('ON',style: TextStyle(color: Colors.white),) : const Text('OFF',style: TextStyle(color: Colors.white),),
+									avatar: CircleAvatar(
+										backgroundColor: Colors.white,
+										child: Icon(Icons.light_mode,color: currentLightState == null ? Colors.yellow : currentLightState == true ? Colors.green : Colors.red,),
+									),
+									backgroundColor: currentLightState == null ? Colors.yellow : currentLightState == true ? Colors.green : Colors.red,
+									elevation: 3.0,
+									padding: const EdgeInsets.all(3.0),
+								),
+								Chip(
+									label: currentRollerBlindState == null ? const Text('UNKNOWN',style: TextStyle(color: Colors.white),) : Text(currentRollerBlindState.toString(),style: const TextStyle(color: Colors.white),),
+									avatar: CircleAvatar(
+										backgroundColor: Colors.white,
+										child: Icon(Icons.roller_shades,color: currentRollerBlindState == null ? Colors.yellow : Colors.lightBlue),
+									),
+									backgroundColor: currentRollerBlindState == null ? Colors.yellow : Colors.lightBlue,
+									elevation: 3.0,
+									padding: const EdgeInsets.all(3.0),
+								),
+						],),
             			LiteRollingSwitch(
               				value: true,
               				textOn: 'ON',
@@ -186,7 +212,7 @@ class _HomePage extends State<HomePage> {
         		} else {
           			print('Disconnected remotely!');
         		}
-        		if (this.mounted) {
+        		if (mounted) {
           			setState(() {});
         		}
 			});
@@ -201,8 +227,8 @@ class _HomePage extends State<HomePage> {
 				context: context, 
 				builder: (BuildContext context){
 					return AlertDialog(
-						title: const Text('Error occurred while connecting to device'),
-						content: const Text('Try later'),
+						title: const Text('ERROR'),
+						content: const Text('An error occurred while connecting to the device, try later.'),
 						actions: <Widget>[
 							TextButton(
 								onPressed: (){
@@ -259,7 +285,7 @@ class _HomePage extends State<HomePage> {
 		if(text.isNotEmpty){
 			try {
 				_connection!.output.add(Uint8List.fromList(utf8.encode('$text\n')));
-				await _connection!.output.allSent;
+				//await _connection!.output.allSent;
 			} catch (exception){
 				print(exception);
 			}
@@ -267,8 +293,23 @@ class _HomePage extends State<HomePage> {
 	}
 
 	void _changeState(String message) {
-		final data = jsonDecode(message);
-		print(data['light']);
-		print(data['roller_blind']);
+		try {
+				final data = jsonDecode(message);
+				print(data['light']);
+				print(data['roller_blind']);
+				if(data['light'] != null){
+					setState(() {
+					  currentLightState = data['light'];
+					});
+				}
+				if(data['roller_blind'] != null){
+					setState(() {
+					  currentRollerBlindState = data['roller_blind'];
+					});
+				}
+		} catch (exception) {
+		  print("Invalid json format");
+		}
+
 	}
 }
