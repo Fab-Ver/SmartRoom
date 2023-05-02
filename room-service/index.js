@@ -50,9 +50,9 @@ app.post("/update_roller_blind_chart", (req, res) => {
     res.send(response);
 });
 
-app.get("/", (req, res) => {
+/* app.get("/", (req, res) => {
     res.send([lightData, rollerBlindData]);
-});
+}); */
 
 app.post("/manage_room_state",body('light').isBoolean(),body('rollerBlind').isInt(), (req, res) => {
     let result = validationResult(req);
@@ -117,7 +117,28 @@ function writeError(error){
     console.log('Message written on serial line');
 }
 
-parser.on('data', console.log);
+parser.on('data', (data) => {
+    try{
+        let jsonData = JSON.parse(data);
+        //console.log(json.light);
+        //console.log(json.roller_blind);
+        if(jsonData.light !== undefined){
+            lightData.push({
+                light : jsonData.light,
+                date : new Date().toISOString(),
+            })
+        }
+        if(jsonData.roller_blind !== undefined){
+            rollerBlindData.push({
+                roller_blind : jsonData.roller_blind, 
+                date : new Date().toISOString(),
+            })
+        }
+    } catch (error) {
+        console.log(error);
+        console.log(data);
+    }
+});
 // list serial ports:
 /*SerialPort.list().then (
   ports => ports.forEach(port =>console.log(port.path)),
