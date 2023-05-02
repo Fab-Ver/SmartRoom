@@ -112,90 +112,98 @@ class _HomePage extends State<HomePage> {
 					? SizedBox(
               			width: MediaQuery.of(context).size.width,
               			height: MediaQuery.of(context).size.height,
-              			child: const Center(child: Text('Connect to the Smart Room Device to use the app'))
+              			child: const Center(child: Text('Connect to the Smart Room Device to use the app...'))
 					)
 					: Center(
         				child: Column(
-          			mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          			children: <Widget>[
-						Row(
-							mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-							children: <Widget>[
-								Chip(
-									label: currentLightState == null ? const Text('UNKNOWN',style: TextStyle(color: Colors.white),) : currentLightState == true ? const Text('ON',style: TextStyle(color: Colors.white),) : const Text('OFF',style: TextStyle(color: Colors.white),),
-									avatar: CircleAvatar(
-										backgroundColor: Colors.white,
-										child: Icon(Icons.light_mode,color: currentLightState == null ? Colors.yellow : currentLightState == true ? Colors.green : Colors.red,),
-									),
-									backgroundColor: currentLightState == null ? Colors.yellow : currentLightState == true ? Colors.green : Colors.red,
-									elevation: 3.0,
-									padding: const EdgeInsets.all(3.0),
+          					mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          					children: <Widget>[
+								Row(
+									mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+									children: <Widget>[
+										Chip(
+											label: currentLightState == null ? const Text('UNKNOWN',style: TextStyle(color: Colors.white),) : currentLightState == true ? const Text('ON',style: TextStyle(color: Colors.white),) : const Text('OFF',style: TextStyle(color: Colors.white),),
+											avatar: CircleAvatar(
+												backgroundColor: Colors.white,
+												child: Icon(Icons.light_mode,color: currentLightState == null ? Colors.yellow : currentLightState == true ? Colors.green : Colors.red,),
+											),
+											backgroundColor: currentLightState == null ? Colors.yellow : currentLightState == true ? Colors.green : Colors.red,
+											elevation: 3.0,
+											padding: const EdgeInsets.all(3.0),
+										),
+										Chip(
+											label: currentRollerBlindState == null ? const Text('UNKNOWN',style: TextStyle(color: Colors.white),) : Text(currentRollerBlindState.toString(),style: const TextStyle(color: Colors.white),),
+											avatar: CircleAvatar(
+												backgroundColor: Colors.white,
+												child: Icon(Icons.roller_shades,color: currentRollerBlindState == null ? Colors.yellow : Colors.lightBlue),
+											),
+											backgroundColor: currentRollerBlindState == null ? Colors.yellow : Colors.lightBlue,
+											elevation: 3.0,
+											padding: const EdgeInsets.all(3.0),
+										),
+									],
 								),
-								Chip(
-									label: currentRollerBlindState == null ? const Text('UNKNOWN',style: TextStyle(color: Colors.white),) : Text(currentRollerBlindState.toString(),style: const TextStyle(color: Colors.white),),
-									avatar: CircleAvatar(
-										backgroundColor: Colors.white,
-										child: Icon(Icons.roller_shades,color: currentRollerBlindState == null ? Colors.yellow : Colors.lightBlue),
-									),
-									backgroundColor: currentRollerBlindState == null ? Colors.yellow : Colors.lightBlue,
-									elevation: 3.0,
-									padding: const EdgeInsets.all(3.0),
-								),
-						],),
-            			LiteRollingSwitch(
-              				value: true,
-              				textOn: 'ON',
-              				textOff: 'OFF',
-              				colorOn: Colors.green,
-              				colorOff: Colors.red,
-              				iconOn: Icons.light_mode,
-              				iconOff: Icons.light_mode_outlined,
-              				animationDuration: const Duration(milliseconds: 100),
-              				onChanged: (bool state) {
-                				print(state);
-								_sendMessage(jsonEncode({'light' : state}));
-              				},
-              				onDoubleTap: () {},
-              				onSwipe: () {},
-              				onTap: () {},
-            			),
-            			SleekCircularSlider(
-              				min: 0,
-              				max: 100,
-              				initialValue: 50,
-              				appearance: CircularSliderAppearance(
-                				startAngle: 180,
-                				angleRange: 180,
-                				customColors: CustomSliderColors(
-                  					progressBarColor: Colors.blue,
-                  					trackColor: Colors.grey.withOpacity(0.4),
-                				),
-                				customWidths: CustomSliderWidths(
-                  					progressBarWidth: 10,
-                  					trackWidth: 10,
-				  					handlerSize: 12,
-                				),
-                				size: 200,
-								infoProperties: InfoProperties(
-									bottomLabelText: 'Roller Blinds',
-									bottomLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
-									modifier: (double value) {
-										return '${value.toInt()}%';
-									}
-								)
-              				),
-              				onChangeEnd: (double value) {
-                				print(value.toInt());
-								_sendMessage(jsonEncode({'roller_blind' : value.toInt()}));
-              				},
-            			)
-          			],
-        		),
-      		),
+            					LiteRollingSwitch(
+              						value: false,
+              						textOn: 'ON',
+              						textOff: 'OFF',
+              						colorOn: Colors.green,
+              						colorOff: Colors.red,
+              						iconOn: Icons.light_mode,
+              						iconOff: Icons.light_mode_outlined,
+              						animationDuration: const Duration(milliseconds: 100),
+              						onChanged: (bool state) {
+										if(isConnected){
+											_sendMessage(jsonEncode({'light' : state}));
+										}
+              						},
+              						onDoubleTap: () {},
+              						onSwipe: () {},
+              						onTap: () {},
+            					),
+            					SleekCircularSlider(
+              						min: 0,
+              						max: 100,
+              						initialValue: 50,
+              						appearance: CircularSliderAppearance(
+                						startAngle: 180,
+                						angleRange: 180,
+                						customColors: CustomSliderColors(
+                  							progressBarColor: Colors.blue,
+                  							trackColor: Colors.grey.withOpacity(0.4),
+                						),
+                						customWidths: CustomSliderWidths(
+                  							progressBarWidth: 10,
+                  							trackWidth: 10,
+				  							handlerSize: 12,
+                						),
+                						size: 200,
+										infoProperties: InfoProperties(
+											bottomLabelText: 'Roller Blinds',
+											bottomLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
+											modifier: (double value) {
+												return '${value.toInt()}%';
+											}
+										)
+              						),
+              						onChangeEnd: (double value) {
+										if(isConnected){
+											_sendMessage(jsonEncode({'roller_blind' : value.toInt()}));
+										}
+              						},
+            					)
+          					],
+        				),
+      				),
     	);
   	}
 
 	void _connectToDevice(){
+		if(_connection != null){
+			_connection?.close();
+			_connection?.dispose();
+			_connection = null;
+		}
 		setState(() {
 		  isConnecting = true;
 		});
@@ -222,6 +230,8 @@ class _HomePage extends State<HomePage> {
 			setState(() {
 			  isConnecting = false;
 			  isDisconnecting = false;
+			  _connection = null;
+			  _selectedDevice = null;
 			});
 			showDialog(
 				context: context, 
@@ -273,7 +283,6 @@ class _HomePage extends State<HomePage> {
 		if (~index != 0) {
 			String message = (backspacesCounter > 0 ? _messageBuffer.substring(0, _messageBuffer.length - backspacesCounter) : _messageBuffer + dataString.substring(0, index)).replaceAll("\n", "").trim();
 			_changeState(message.substring(message.indexOf('{'),message.length));
-			print(message.substring(message.indexOf('{'),message.length));
         	_messageBuffer = '';
     	} else {
       		_messageBuffer = (backspacesCounter > 0 ? _messageBuffer.substring(0, _messageBuffer.length - backspacesCounter) : _messageBuffer + dataString);
@@ -294,22 +303,19 @@ class _HomePage extends State<HomePage> {
 
 	void _changeState(String message) {
 		try {
-				final data = jsonDecode(message);
-				print(data['light']);
-				print(data['roller_blind']);
-				if(data['light'] != null){
-					setState(() {
-					  currentLightState = data['light'];
-					});
-				}
-				if(data['roller_blind'] != null){
-					setState(() {
-					  currentRollerBlindState = data['roller_blind'];
-					});
-				}
+			final data = jsonDecode(message);
+			if(data['light'] != null){
+				setState(() {
+					currentLightState = data['light'];
+				});
+			}
+			if(data['roller_blind'] != null){
+				setState(() {
+					currentRollerBlindState = data['roller_blind'];
+				});
+			}
 		} catch (exception) {
 		  print("Invalid json format");
 		}
-
 	}
 }

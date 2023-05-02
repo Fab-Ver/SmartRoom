@@ -90,7 +90,7 @@ class _DiscoverDevicePage extends State<DiscoverDevicePage>{
 									],
 								)
 							), 
-							icon: Icon(Icons.info_outline))
+							icon: const Icon(Icons.info_outline))
 				],
 			),
 			body: ListView.builder(
