@@ -1,7 +1,7 @@
 #include "RollerBlind.h"
 
 RollerBlind::RollerBlind(int pin){
-    motor.attach(pin);
+    this->pin = pin;
 }
 
 void RollerBlind::setPosition(int angle){
@@ -12,5 +12,13 @@ void RollerBlind::setPosition(int angle){
     }
     float coeff = ((float)(MAX_PULSE_WIDTH - MIN_PULSE_WIDTH))/180.0;
     motor.write(MIN_PULSE_WIDTH + angle * coeff);
+}
+
+void RollerBlind::on(){
+    motor.attach(pin);
+}
+
+void RollerBlind::off(){
+    motor.detach();
 }
 
