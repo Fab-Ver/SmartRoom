@@ -2,12 +2,37 @@ import {CAlert, CBadge, CButton, CCard, CCardBody, CCardFooter, CCardHeader, CCo
 import '@coreui/coreui/dist/css/coreui.min.css'
 import './App.css'
 import { useEffect, useState } from 'react'
-import { CChart } from '@coreui/react-chartjs'
+import React from 'react';
 import axios from 'axios'
-import { format } from 'date-fns'
 import  CIcon  from '@coreui/icons-react';
 import { cilSync } from '@coreui/icons';
 
+import {
+	Chart as ChartJS,
+	TimeScale,
+	CategoryScale,
+	LinearScale,
+	PointElement,
+	LineElement,
+	Title,
+	Tooltip,
+	Legend,
+  } from 'chart.js';
+import 'chartjs-adapter-date-fns';
+import { it } from 'date-fns/locale';
+import { Line } from 'react-chartjs-2';
+
+ChartJS.register(
+	TimeScale,
+	CategoryScale,
+	LinearScale,
+	PointElement,
+	LineElement,
+	Title,
+	Tooltip,
+	Legend,
+);
+  
 const App = () => {
 	const [manageLight, setManageLight] = useState(false);
   	const [manageRollerBlind, setManageRollerBlind] = useState(50);
@@ -77,7 +102,7 @@ const App = () => {
 			if (response.data.success !== undefined) {
 		  		let light_data = response.data.success.light_data;
 		  		if(light_data.length > 0){
-					let new_label = light_data.map(ld => format(new Date(ld.date),'yyyy-MM-dd HH:mm:ss'));
+					let new_label = light_data.map(ld => new Date(ld.date));
 					let new_data = light_data.map(ld => ld.light ? 'ON' : 'OFF');
 					let new_light_data = {
 						label : new_label,
@@ -100,7 +125,7 @@ const App = () => {
 			if (response.data.success !== undefined) {
 		  		let roller_blind_data = response.data.success.roller_blind_data;
 		  		if(roller_blind_data.length > 0){
-					let new_label = roller_blind_data.map(rbd => format(new Date(rbd.date),'yyyy-MM-dd HH:mm:ss'));
+					let new_label = roller_blind_data.map(rbd => new Date(rbd.date));
 					let new_data = roller_blind_data.map(rbd => rbd.roller_blind);
 					let new_roller_blind_data = {
 						label : new_label,
@@ -177,17 +202,46 @@ const App = () => {
 							</CRow>
 						</CCardHeader>
 						<CCardBody>
-							<CChart 
-								type='line'
+							<Line 
+								data={{
+									labels : lightData.label,
+									datasets : [
+										{
+											label: 'Light Data',
+											data: lightData.data,
+											backgroundColor: '#E46651',
+											borderColor: '#E46651',
+											pointHoverBackgroundColor: '#E46651',
+											stepped: true,
+										}
+									]
+								}}
 								options={{
 									responsive : true,
 									plugins: {
 										title : {
 											display : true,
-											text : 'Light Status'
+											text : 'Light State'
 										}			
 									},
 									scales : {
+										x : {
+											type : 'time',
+											time: {
+												parser: 'MM/dd/yyyy HH:mm:ss',
+              									tooltipFormat: 'MM/dd/yyyy HH:mm:ss',
+              									unit: 'second',
+              									unitStepSize: 1,
+              									displayFormats: {
+                									'second': 'MM/dd/yyyy HH:mm:ss'
+              									}
+											},
+											adapters : {
+												date : {
+													locale : it,
+												}
+											}
+										},
 										y : {
 											type : 'category',
 											labels : ['ON', 'OFF'],
@@ -207,21 +261,7 @@ const App = () => {
 										},
 									},
 								}}
-								customTooltips={false}
-								data={{
-									labels : lightData.label,
-									datasets : [
-										{
-											label: 'Light Data',
-											data: lightData.data,
-											backgroundColor: '#E46651',
-                  							borderColor: '#E46651',
-                  							pointHoverBackgroundColor: '#E46651',
-      										stepped: true,
-										}
-									]
-								}}
-							></CChart>
+							/>
 						</CCardBody>
 					</CCard>
 				</CCol>
@@ -240,17 +280,45 @@ const App = () => {
 							</CRow>
 						</CCardHeader>
 						<CCardBody>
-							<CChart 
-								type='line'
+						<Line 
+								data={{
+									labels : rollerBlindData.label,
+									datasets : [
+										{
+											label: 'Roller Blind Data',
+											data: rollerBlindData.data,
+											backgroundColor: '#E46651',
+											borderColor: '#E46651',
+											pointHoverBackgroundColor: '#E46651',
+										}
+									]
+								}}
 								options={{
 									responsive : true,
 									plugins: {
 										title : {
 											display : true,
-											text : 'Roller Blind Status'
+											text : 'Roller Blind State'
 										}			
 									},
 									scales : {
+										x : {
+											type : 'time',
+											time: {
+												parser: 'MM/dd/yyyy HH:mm:ss',
+              									tooltipFormat: 'MM/dd/yyyy HH:mm:ss',
+              									unit: 'second',
+              									unitStepSize: 1,
+              									displayFormats: {
+                									'second': 'MM/dd/yyyy HH:mm:ss'
+              									}
+											},
+											adapters : {
+												date : {
+													locale : it,
+												}
+											}
+										},
 										y : {
 											offset : true,
 										}
@@ -268,20 +336,7 @@ const App = () => {
 										},
 									},
 								}}
-								customTooltips={false}
-								data={{
-									labels : rollerBlindData.label,
-									datasets : [
-										{
-											label: 'Roller Blind Data',
-											data: rollerBlindData.data,
-											backgroundColor: '#E46651',
-                  							borderColor: '#E46651',
-                  							pointHoverBackgroundColor: '#E46651',
-										}
-									]
-								}}
-							></CChart>
+							/>
 						</CCardBody>
 					</CCard>
 				</CCol>
