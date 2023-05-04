@@ -114,87 +114,122 @@ class _HomePage extends State<HomePage> {
               			height: MediaQuery.of(context).size.height,
               			child: const Center(child: Text('Connect to the Smart Room Device to use the app...'))
 					)
-					: Center(
-        				child: Column(
-          					mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          					children: <Widget>[
-								Row(
-									mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-									children: <Widget>[
-										Chip(
-											label: currentLightState == null ? const Text('UNKNOWN',style: TextStyle(color: Colors.white),) : currentLightState == true ? const Text('ON',style: TextStyle(color: Colors.white),) : const Text('OFF',style: TextStyle(color: Colors.white),),
-											avatar: CircleAvatar(
-												backgroundColor: Colors.white,
-												child: Icon(Icons.light_mode,color: currentLightState == null ? Colors.yellow : currentLightState == true ? Colors.green : Colors.red,),
-											),
-											backgroundColor: currentLightState == null ? Colors.yellow : currentLightState == true ? Colors.green : Colors.red,
-											elevation: 3.0,
-											padding: const EdgeInsets.all(3.0),
+					: Container(
+						padding: const EdgeInsets.all(16.0),
+						child: Column(children: [
+							Card(
+								elevation: 6.0,
+								shape: RoundedRectangleBorder(
+        							borderRadius: BorderRadius.circular(10.0),
+      							),
+								margin: const EdgeInsets.only(bottom: 15.0),
+								child: Column(
+									children:  <Widget>[
+										const ListTile(
+											leading: Icon(Icons.info_outlined,color: Colors.white,),
+											title: Text('Current Room State', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
+											tileColor: Colors.blue,	
 										),
-										Chip(
-											label: currentRollerBlindState == null ? const Text('UNKNOWN',style: TextStyle(color: Colors.white),) : Text(currentRollerBlindState.toString(),style: const TextStyle(color: Colors.white),),
-											avatar: CircleAvatar(
-												backgroundColor: Colors.white,
-												child: Icon(Icons.roller_shades,color: currentRollerBlindState == null ? Colors.yellow : Colors.lightBlue),
+										ListTile(
+											leading: const Icon(Icons.light_mode),
+											title: const Text('Light',style: TextStyle(fontWeight: FontWeight.bold),),
+											trailing: Chip(
+												label: currentLightState == null ? const Text('UNKNOWN',style: TextStyle(color: Colors.white),) : currentLightState == true ? const Text('ON',style: TextStyle(color: Colors.white),) : const Text('OFF',style: TextStyle(color: Colors.white),),
+												backgroundColor: currentLightState == null ? Colors.yellow : currentLightState == true ? Colors.green : Colors.red,
+												elevation: 3.0,
+												padding: const EdgeInsets.all(3.0),
 											),
-											backgroundColor: currentRollerBlindState == null ? Colors.yellow : Colors.lightBlue,
-											elevation: 3.0,
-											padding: const EdgeInsets.all(3.0),
 										),
-									],
+										ListTile(
+											leading: const Icon(Icons.roller_shades),
+											title: const Text('Roller Blind',style: TextStyle(fontWeight: FontWeight.bold),),
+											trailing: Chip(
+												label: currentRollerBlindState == null ? const Text('UNKNOWN',style: TextStyle(color: Colors.white),) : Text(currentRollerBlindState.toString(),style: const TextStyle(color: Colors.white),),
+												backgroundColor: currentRollerBlindState == null ? Colors.yellow : Colors.lightBlue,
+												elevation: 3.0,
+												padding: const EdgeInsets.all(3.0),
+											),
+										),
+									]
 								),
-            					LiteRollingSwitch(
-              						value: false,
-              						textOn: 'ON',
-              						textOff: 'OFF',
-              						colorOn: Colors.green,
-              						colorOff: Colors.red,
-              						iconOn: Icons.light_mode,
-              						iconOff: Icons.light_mode_outlined,
-              						animationDuration: const Duration(milliseconds: 100),
-              						onChanged: (bool state) {
-										if(isConnected){
-											_sendMessage(jsonEncode({'light' : state}));
-										}
-              						},
-              						onDoubleTap: () {},
-              						onSwipe: () {},
-              						onTap: () {},
-            					),
-            					SleekCircularSlider(
-              						min: 0,
-              						max: 100,
-              						initialValue: 50,
-              						appearance: CircularSliderAppearance(
-                						startAngle: 180,
-                						angleRange: 180,
-                						customColors: CustomSliderColors(
-                  							progressBarColor: Colors.blue,
-                  							trackColor: Colors.grey.withOpacity(0.4),
-                						),
-                						customWidths: CustomSliderWidths(
-                  							progressBarWidth: 10,
-                  							trackWidth: 10,
-				  							handlerSize: 12,
-                						),
-                						size: 200,
-										infoProperties: InfoProperties(
-											bottomLabelText: 'Roller Blinds',
-											bottomLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
-											modifier: (double value) {
-												return '${value.toInt()}%';
-											}
+							),
+							Card(
+								elevation: 6.0,
+								shape: RoundedRectangleBorder(
+        							borderRadius: BorderRadius.circular(10.0),
+      							),
+								child: Column(
+									children:  <Widget>[
+										const ListTile(
+											leading: Icon(Icons.settings,color: Colors.white,),
+											title: Text('Manage Room State', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
+											tileColor: Colors.blue,	
+										),
+										Row(
+											mainAxisSize: MainAxisSize.max,
+											mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+											children: <Widget>[	
+												Container(
+													margin: const EdgeInsets.only(bottom: 25.0),
+													child: LiteRollingSwitch(
+              											value: false,
+              											textOn: 'ON',
+              											textOff: 'OFF',
+              											colorOn: Colors.green,
+              											colorOff: Colors.red,
+              											iconOn: Icons.light_mode,
+              											iconOff: Icons.light_mode_outlined,
+              											onChanged: (bool state) {
+															if(isConnected){
+																_sendMessage(jsonEncode({'light' : state}));
+															}
+              											},
+              											onDoubleTap: () {},
+              											onSwipe: () {},
+              											onTap: () {},
+            										)
+												),
+												Container( 
+													margin: const EdgeInsets.only(top: 50.0),
+													child: SleekCircularSlider(
+              											min: 0,
+              											max: 100,
+              											initialValue: 50,
+              											appearance: CircularSliderAppearance(
+                											startAngle: 180,
+                											angleRange: 180,
+                											customColors: CustomSliderColors(
+                  												progressBarColor: Colors.blue,
+                  												trackColor: Colors.grey.withOpacity(0.4),
+                											),
+                											customWidths: CustomSliderWidths(
+                  												progressBarWidth: 10,
+                  												trackWidth: 10,
+				  												handlerSize: 12,
+                											),
+                											size: 200,
+															infoProperties: InfoProperties(
+																bottomLabelText: 'Roller Blinds',
+																bottomLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
+																modifier: (double value) {
+																	return '${value.toInt()}%';
+																}
+															)
+              											),
+              											onChangeEnd: (double value) {
+															if(isConnected){
+																_sendMessage(jsonEncode({'roller_blind' : value.toInt()}));
+															}
+              											},
+            										)
+												)
+											]
 										)
-              						),
-              						onChangeEnd: (double value) {
-										if(isConnected){
-											_sendMessage(jsonEncode({'roller_blind' : value.toInt()}));
-										}
-              						},
-            					)
-          					],
-        				),
-      				),
+									]
+								),
+							),
+						]),
+					)
     	);
   	}
 
@@ -297,6 +332,10 @@ class _HomePage extends State<HomePage> {
 				//await _connection!.output.allSent;
 			} catch (exception){
 				print(exception);
+				setState(() {
+					_connection = null;
+					_selectedDevice = null;
+				});
 			}
 		}
 	}
