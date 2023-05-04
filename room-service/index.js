@@ -6,8 +6,13 @@ const { SerialPort, ReadlineParser  } = require('serialport');
 const parser = new ReadlineParser()
 
 const PORT = 8080;
+const lightData = Array();
+const rollerBlindData = Array();
 
-const SERIAL_PORT = 'COM7';
+/**----------------------------------------------------------------------------------------------------
+ * Section used to connect to Arduino UNO trough serial port.
+---------------------------------------------------------------------------------------------------- */
+const SERIAL_PORT = 'COM7'; //Change with the Arduino UNO port. 
 
 const serial = new SerialPort({
     path : SERIAL_PORT,
@@ -16,15 +21,89 @@ const serial = new SerialPort({
     if(error){
         return console.log('Error: ', error.message);
     }
-    console.log('Port opened')
+    console.log('Port opened ' + SERIAL_PORT);
 })
 
 serial.pipe(parser);
 
-const app = express();
+parser.on('data', (data) => {
+    try{
+        let jsonData = JSON.parse(data);
+        if(jsonData.light !== undefined){
+            lightData.push({
+                light : jsonData.light,
+                date : new Date().toISOString(),
+            })
+        }
+        if(jsonData.roller_blind !== undefined){
+            rollerBlindData.push({
+                roller_blind : jsonData.roller_blind, 
+                date : new Date().toISOString(),
+            })
+        }
+    } catch (error) {
+        console.log(error);
+        console.log(data);
+    }
+});
 
-const lightData = Array();
-const rollerBlindData = Array();
+function writeError(error){
+    if(error){
+        return console.log('Error on write: ', error.message);
+    }
+    console.log('Message written on serial line');
+}
+
+//  Use this code to list the available serial port. 
+/*SerialPort.list().then (
+  ports => ports.forEach(port =>console.log(port.path)),
+  err => console.log(err)
+);*/
+
+/**---------------------------------------------------------------------------------------------------- */
+
+/**----------------------------------------------------------------------------------------------------
+ * Section used to receive messages from ESP32 through MQTT.
+---------------------------------------------------------------------------------------------------- */
+client.on('connect', () => {
+    console.log('Connected to MQTT broker');
+    client.subscribe(['light-state'], () => {
+      console.log(`Subscribe to topic light-state`);
+    })
+    client.subscribe(['roller-blind-state'], () => {
+        console.log(`Subscribe to topic roller-blind-state`);
+    })
+})
+
+client.on('message', (topic,payload) => {
+    console.log('Received Message:', topic, payload.toString());
+    try {
+        let message = JSON.parse(payload.toString());
+        if(topic === 'light-state'){
+            let data = {
+                light : message.light, 
+                date : new Date().toISOString(),
+            };
+            lightData.push(data);
+        } else if (topic === 'roller-blind-state'){
+            let data = {
+                roller_blind : message.roller_blind, 
+                date : new Date().toISOString(),
+            };
+            rollerBlindData.push(data);
+        }
+        serial.write(payload.toString() + "\n", (err) => writeError(err));
+    } catch (error) {
+        console.log("Error parsing JSON received from MQTT.");
+    }
+})
+
+/**---------------------------------------------------------------------------------------------------- */
+
+/**---------------------------------------------------------------------------------------------------- 
+ * Section used to send and receive data through HTTP to the dashboard
+---------------------------------------------------------------------------------------------------- */
+const app = express();
 
 app.use(express.json());
 
@@ -50,11 +129,7 @@ app.post("/update_roller_blind_chart", (req, res) => {
     res.send(response);
 });
 
-/* app.get("/", (req, res) => {
-    res.send([lightData, rollerBlindData]);
-}); */
-
-app.post("/manage_room_state",body('light').isBoolean(),body('rollerBlind').isInt(), (req, res) => {
+app.post("/manage_room_state", body('light').isBoolean(), body('rollerBlind').isInt(), (req, res) => {
     let result = validationResult(req);
     if(result.isEmpty()){
         let light_state = req.body.light;
@@ -80,70 +155,8 @@ app.listen(PORT, () => {
   console.log(`Server listening on ${PORT}`);
 });
 
-client.on('connect', () => {
-    console.log('Connected')
-    client.subscribe(['light-state'], () => {
-      console.log(`Subscribe to topic light-state`)
-    })
-    client.subscribe(['roller-blind-state'], () => {
-        console.log(`Subscribe to topic roller-blind-state`)
-    })
-})
+/**---------------------------------------------------------------------------------------------------- */
 
-client.on('message', (topic,payload) => {
-    console.log('Received Message:', topic, payload.toString())
-    let message = JSON.parse(payload.toString());
-    if(topic === 'light-state'){
-        let data = {
-            light : message.light, 
-            date : new Date().toISOString(),
-        };
-        lightData.push(data);
-    } else if (topic === 'roller-blind-state'){
-        let data = {
-            roller_blind : message.roller_blind, 
-            date : new Date().toISOString(),
-        };
-        rollerBlindData.push(data);
-    }
-    serial.write(payload.toString() + "\n", (err) => writeError(err));
-})
-
-
-function writeError(error){
-    if(error){
-        return console.log('Error on write: ', error.message);
-    }
-    console.log('Message written on serial line');
-}
-
-parser.on('data', (data) => {
-    try{
-        let jsonData = JSON.parse(data);
-        //console.log(json.light);
-        //console.log(json.roller_blind);
-        if(jsonData.light !== undefined){
-            lightData.push({
-                light : jsonData.light,
-                date : new Date().toISOString(),
-            })
-        }
-        if(jsonData.roller_blind !== undefined){
-            rollerBlindData.push({
-                roller_blind : jsonData.roller_blind, 
-                date : new Date().toISOString(),
-            })
-        }
-    } catch (error) {
-        console.log(error);
-        console.log(data);
-    }
-});
-// list serial ports:
-/*SerialPort.list().then (
-  ports => ports.forEach(port =>console.log(port.path)),
-  err => console.log(err)
-);*/
 
 
 
