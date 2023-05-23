@@ -1,5 +1,8 @@
 # SmartRoom
 Third assignment of Embedded Systems and IoT course 2022/2023
+## How to use 
+Please read the project description located in the report within the `doc` folder.
+**Note:** the source code of the Room App can be found in the `room-app/lib/` folder.  
 ## Assignment Description
 We want to realise an IoT system implementing a simplified version of a smart room, as a smart system monitoring and controlling the state of a room. 
 
