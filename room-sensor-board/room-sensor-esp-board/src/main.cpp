@@ -8,9 +8,10 @@
 
 /**
  * WIFI network info
+ * Insert your network info to use the program
 */
-const char* ssid = "iPhone di Fabio";
-const char* password = "fabio0104";
+const char* ssid = "WIFI_name";
+const char* password = "WIFI_password";
 
 SemaphoreHandle_t xMutex;
 void setup_wifi();
