@@ -4,28 +4,28 @@ Third assignment of Embedded Systems and IoT course 2022/2023
 Please read the project description located in the report within the `doc` folder.
 **Note:** the source code of the Room App can be found in the `room-app/lib/` folder.  
 ## Assignment Description
-We want to realise an IoT system implementing a simplified version of a smart room, as a smart system monitoring and controlling the state of a room. 
+We want to realize an IoT system implementing a simplified version of a smart room, as a smart system monitoring and controlling the state of a room. 
 
 The system is composed of 5 subsystems: 
 - <b>Room Sensor-Board (esp):</b> embedded system to monitor the state of the room by using a set of sensors. It interacts with the Room Service (via MQTT).
 - <b>Room Service (backend - pc):</b> service functioning as the main unit governing the management of the room, it interacts through the serial line with the Controller (arduino), it interacts via MQTT with the Room SensorBoard (esp), it interacts via HTTP with the Dashboard (frontend/PC).
 - <b>Room Controller (Arduino):</b> embedded system controlling lighting and roller blinds; it interacts via serial line with the Room Service and via BT with the Room App.
 - <b>Room App (Android - smartphone):</b> mobile app that makes it possible to manually control lights and roller blinds, it interacts with the Room Controller via Bluetooth.
-- <b>Room Dashboard (Frontend)</b>: front-end to visualise and track the state of the room, it interacts with the Room Service.
+- <b>Room Dashboard (Frontend)</b>: front-end to visualize and track the state of the room, it interacts with the Room Service.
 
 ### Hardware components :desktop_computer:
 - <b>Room Sensor-board:</b>
   - SoC ESP32 board (or ESP8266)
   - 1 green led 
   - 1 PIR
-  - 1 photoresistor analog sensor
+  - 1 photo-resistor analog sensor
 - <b>Room Controller:</b>
   - Microcontroller Arduino UNO board including:
   - 1 green led simulating a light subsystem
   - 1 servo motor simulating the roller blind subsystem
   - 1 Bluetooth module HC-06 o HC-05
 
-### General Behaviour of the system
+### General Behavior of the system
 
 The Smart Room system is meant to control the lighting system and roller blinds according to the following policy:
 - If no one is in the room, the light (of the lighting subsystem) should be off.
